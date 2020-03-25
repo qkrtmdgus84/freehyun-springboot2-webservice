@@ -16,7 +16,7 @@ cache:
 script: "./gradlew clean build"
 
 # CI 실행 완료시 메일로 알람
-notifications:
+notifications: #Travis CI 실행 완료 시 자동으로 알람이 가도록 설정
   email:
    recipients:
       - shounghyun@gmail.com
