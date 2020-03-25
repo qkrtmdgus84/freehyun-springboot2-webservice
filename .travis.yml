@@ -2,20 +2,36 @@ language: java
 jdk:
   - openjdk8
 
-branches:
+branches: #Travis CI를 어느 브랜치가 푸시될 때 수행할지 지정, 현재 옵션은 오직 master 브랜치에 push 될 때만 수행
   only:
     - master
 
 # Travis CI 서버의 Home
-cache:
+cache: #그레이들을 통해 의존성을 받게 되면 이를 해당 디렉토리에 캐시하여, 같은 의존성은 다음 배포 때부터 다시 받지 않도록 설정
   directories:
     - '$HOME/.m2/repository'
     - '$HOME/.gradle'
 
-
+#master 브랜치에 푸시되었을 때 수행하는 명령어, 여기서는 프로젝트 내부에 둔 gradlew 을 통해 clean & build 를 수행
 script: "./gradlew clean build"
 
-# CI 실행 완료시 메일로 알람
+before_deploy: #deploy 명령어가 실행되기 전에 수행, CodeDeploy 는 Jar 파일을 인식하지 못하므로 Jar+ 기타 설정 파일들을 모아 압축(zip)
+  - zip -r freehyun-springboot2-webservice * # 혀재 위치의 모든 파일을 freehyun-springboot2-webservice 이름으로 압축, 명령어의 마지막 위치는 본인의 프로젝트 이름
+  - mkdir -p deploy # deploy 라는 디렉토리를 Travis CI 가 실행 중인 위치에서 생성
+  - mv freehyun-springboot2-webservice.zip deploy/freehyun-springboot2-webservice.zip # freehyun-springboot2-webservice.zip 파일을 deploy/freehyun-springboot2-webservice.zip 으로 이동
+
+deploy:
+  - provider: s3
+    access_key_id: $AWS_ACCESS_KEY # Travis repo settings 에 설정된 값
+    secret_access_key: $AWS_SECRET_KEY # Travis repo settings 에 설정된 값
+    bucket: freehyun-springboot-build # S3 버킷
+    region: ap-northeast-2
+    skip_cleanup: true
+    acl: private # zip 파일 접근을 private 으로
+    local_dir: deploy # before_deploy 에서 생성한 디렉토리, 해당 위치의 파일들만 S3로 전송
+    wait-until-deployed: true
+
+# C 실행 완료시 메일로 알람
 notifications: #Travis CI 실행 완료 시 자동으로 알람이 가도록 설정
   email:
    recipients:
