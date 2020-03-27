@@ -2,7 +2,6 @@ package com.freehyun.book.springboot.web;
 
 import com.freehyun.book.springboot.web.dto.HelloResponseDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,8 +13,6 @@ import java.util.List;
 @RestController //1.컨트롤러를 JSON 을 반환하는 컨트롤러로 만들어준다. 예전에는 @ResponseBody 를 각 메소드만다 선언했던 것을 한번에 사용할 수 있게 해준다고 생각하면 된다.
 public class HelloController {
 
-    private final Environment env;
-
     @GetMapping("/hello") //2.HTTP Method 인 Get 의 요청을 받을 수 있는 API 를 만들어 준다. 예전에는 @RequestMapping(method = RequestMethod.GET)으로 사용되었다. 이제 이프로젝트는 /hello 로 요청이 오면 문자열 hello 를 반환하는 기능을 가지게 된다.
     public String hello() {
         return  "hello";
@@ -26,18 +23,4 @@ public class HelloController {
         return new HelloResponseDto(name, amount);
     }
 
-    @GetMapping("/profile")
-    public String profile() {
-        List<String> profiles = Arrays.asList(env.getActiveProfiles());
-
-        if(profiles.contains("real1")){
-            return "real1";
-        }
-
-        if(profiles.contains("real2")){
-            return "real2";
-        }
-
-        return profiles.get(0);
-    }
 }
